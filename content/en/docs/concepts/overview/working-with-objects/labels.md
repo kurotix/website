@@ -1,18 +1,14 @@
 ---
-reviewers:
+critiques:
 - mikedanese
-title: Labels and Selectors
-content_type: concept
-weight: 40
+titre: Étiquettes et sélecteurs
+type de contenu: concept
+poids: 40
 ---
 
 <!-- overview -->
 
-_Labels_ are key/value pairs that are attached to objects, such as pods.
-Labels are intended to be used to specify identifying attributes of objects that are meaningful and relevant to users, but do not directly imply semantics to the core system.
-Labels can be used to organize and to select subsets of objects. Labels can be attached to objects at creation time and subsequently added and modified at any time.
-Each object can have a set of key/value labels defined. Each Key must be unique for a given object.
-
+Les étiquettes sont des paires clé / valeur attachées à des objets, tels que des pods. Les étiquettes sont destinées à être utilisées pour spécifier les attributs d'identification des objets qui sont significatifs et pertinents pour les utilisateurs, mais n'impliquent pas directement la sémantique du système central. Les étiquettes peuvent être utilisées pour organiser et sélectionner des sous-ensembles d'objets. Les étiquettes peuvent être attachées aux objets au moment de la création, puis ajoutées et modifiées à tout moment. Chaque objet peut avoir un ensemble d'étiquettes clé / valeur définies. Chaque clé doit être unique pour un objet donné.
 ```json
 "metadata": {
   "labels": {
@@ -22,19 +18,18 @@ Each object can have a set of key/value labels defined. Each Key must be unique 
 }
 ```
 
-Labels allow for efficient queries and watches and are ideal for use in UIs
-and CLIs. Non-identifying information should be recorded using
+Les étiquettes permettent des requêtes et des contrôles efficaces et sont idéales pour une utilisation dans les interfaces utilisateur et les CLI. Les informations non identifiantes doivent être enregistrées en utilisant
 [annotations](/docs/concepts/overview/working-with-objects/annotations/).
 
 <!-- body -->
 
 ## Motivation
 
-Labels enable users to map their own organizational structures onto system objects in a loosely coupled fashion, without requiring clients to store these mappings.
+Les libellés permettent aux utilisateurs de mapper leurs propres structures organisationnelles sur des objets système de manière faiblement couplée, sans exiger des clients qu'ils stockent ces mappages.
 
-Service deployments and batch processing pipelines are often multi-dimensional entities (e.g., multiple partitions or deployments, multiple release tracks, multiple tiers, multiple micro-services per tier). Management often requires cross-cutting operations, which breaks encapsulation of strictly hierarchical representations, especially rigid hierarchies determined by the infrastructure rather than by users.
+Les déploiements de services et les pipelines de traitement par lots sont souvent des entités multidimensionnelles (par exemple, plusieurs partitions ou déploiements, plusieurs pistes de publication, plusieurs niveaux, plusieurs micro-services par niveau). La gestion nécessite souvent des opérations transversales, ce qui rompt l'encapsulation des représentations strictement hiérarchiques, en particulier des hiérarchies rigides déterminées par l'infrastructure plutôt que par les utilisateurs.
 
-Example labels:
+Exemples d'étiquettes:
 
    * `"release" : "stable"`, `"release" : "canary"`
    * `"environment" : "dev"`, `"environment" : "qa"`, `"environment" : "production"`
@@ -42,22 +37,22 @@ Example labels:
    * `"partition" : "customerA"`, `"partition" : "customerB"`
    * `"track" : "daily"`, `"track" : "weekly"`
 
-These are examples of commonly used labels; you are free to develop your own conventions. Keep in mind that label Key must be unique for a given object.
+Ce sont des exemples d'étiquettes couramment utilisées; vous êtes libre de développer vos propres conventions. Gardez à l'esprit que l'étiquette Key doit être unique pour un objet donné.
 
-## Syntax and character set
+## Syntaxe et jeu de caractères
 
-_Labels_ are key/value pairs. Valid label keys have two segments: an optional prefix and name, separated by a slash (`/`). The name segment is required and must be 63 characters or less, beginning and ending with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between. The prefix is optional. If specified, the prefix must be a DNS subdomain: a series of DNS labels separated by dots (`.`), not longer than 253 characters in total, followed by a slash (`/`).
+Les libellés sont des paires clé / valeur. Les clés d'étiquette valides ont deux segments: un préfixe et un nom facultatifs, séparés par une barre oblique (`/`). Le segment de nom est obligatoire et ne doit pas comporter plus de 63 caractères, commençant et se terminant par un caractère alphanumérique (`[a-z0-9A-Z]`) avec des tirets (`-`), souligne (`_`), points (`.`), et alphanumériques entre. Le préfixe est facultatif. S'il est spécifié, le préfixe doit être un sous-domaine DNS: une série d'étiquettes DNS séparées par des points (`.`), pas plus de 253 caractères au total, suivis d'une barre oblique (`/`).
 
-If the prefix is omitted, the label Key is presumed to be private to the user. Automated system components (e.g. `kube-scheduler`, `kube-controller-manager`, `kube-apiserver`, `kubectl`, or other third-party automation) which add labels to end-user objects must specify a prefix.
+Si le préfixe est omis, l'étiquette Clé est présumée privée pour l'utilisateur. Composants du système automatisé (e.g. `kube-scheduler`, `kube-controller-manager`, `kube-apiserver`, `kubectl`, ou autre automatisation tierce) qui ajoutent des étiquettes aux objets de l'utilisateur final doivent spécifier un préfixe.
 
-The `kubernetes.io/` and `k8s.io/` prefixes are reserved for Kubernetes core components.
+Le `kubernetes.io/` et `k8s.io/` les préfixes sont réservés aux composants principaux de Kubernetes.
 
-Valid label value:
-* must be 63 characters or less (can be empty),
-* unless empty, must begin and end with an alphanumeric character (`[a-z0-9A-Z]`),
-* could contain dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between.
+Valeur d'étiquette valide:
+* doit contenir 63 caractères ou moins (peut être vide),
+* sauf s'il est vide, doit commencer et se terminer par un caractère alphanumérique (`[a-z0-9A-Z]`),
+* pourrait contenir des tirets (`-`), souligne (`_`), points (`.`), et entre alphanumériques.
 
-For example, here's the configuration file for a Pod that has two labels `environment: production` and `app: nginx` :
+Par exemple, voici le fichier de configuration d'un pod qui a deux étiquettes `environment: production` et `app: nginx` :
 
 ```yaml
 
@@ -77,44 +72,46 @@ spec:
 
 ```
 
-## Label selectors
+## Sélecteurs d'étiquettes
 
-Unlike [names and UIDs](/docs/concepts/overview/working-with-objects/names/), labels do not provide uniqueness. In general, we expect many objects to carry the same label(s).
+Contrairement à [noms et UIDs](/docs/concepts/overview/working-with-objects/names/), les étiquettes n'offrent pas de caractère unique. En général, nous nous attendons à ce que de nombreux objets portent la même étiquette(s).
 
-Via a _label selector_, the client/user can identify a set of objects. The label selector is the core grouping primitive in Kubernetes.
+Via un sélecteur d'étiquettes, le client / utilisateur peut identifier un ensemble d'objets. Le sélecteur d'étiquettes est la primitive de regroupement de base dans Kubernetes.
 
-The API currently supports two types of selectors: _equality-based_ and _set-based_.
-A label selector can be made of multiple _requirements_ which are comma-separated. In the case of multiple requirements, all must be satisfied so the comma separator acts as a logical _AND_ (`&&`) operator.
+L'API prend actuellement en charge deux types de sélecteurs: _equality-based_ and _set-based_.
+Un sélecteur d'étiquette peut être constitué de plusieurs _exigences_ séparées par des virgules. Dans le cas d'exigences multiples, toutes doivent être satisfaites pour que le séparateur par virgule agisse comme un opérateur logique _AND_ (`&&`) operateur.
 
-The semantics of empty or non-specified selectors are dependent on the context,
-and API types that use selectors should document the validity and meaning of
-them.
+La sémantique des sélecteurs vides ou non spécifiés dépend du contexte,
+et les types d'API qui utilisent des sélecteurs doivent documenter la validité et la signification de
+eux.
 
-{{< note >}}
-For some API types, such as ReplicaSets, the label selectors of two instances must not overlap within a namespace, or the controller can see that as conflicting instructions and fail to determine how many replicas should be present.
-{{< /note >}}
+{{< Remarque >}}
+Pour certains types d'API, tels que les ReplicaSets, les sélecteurs d'étiquettes de deux instances ne doivent pas se chevaucher dans un espace de noms, ou le contrôleur peut voir cela comme des instructions contradictoires et ne pas déterminer le nombre de réplicas qui doivent être présents.
+{{< /Remarque >}}
 
-{{< caution >}}
+{{< mise en garde >}}
 For both equality-based and set-based conditions there is no logical _OR_ (`||`) operator. Ensure your filter statements are structured accordingly.
-{{< /caution >}}
+{{< /mise en garde >}}
 
-### _Equality-based_ requirement
+### Exigeance _Equality-based_
 
-_Equality-_ or _inequality-based_ requirements allow filtering by label keys and values. Matching objects must satisfy all of the specified label constraints, though they may have additional labels as well.
-Three kinds of operators are admitted `=`,`==`,`!=`. The first two represent _equality_ (and are synonyms), while the latter represents _inequality_. For example:
+_Equality-_ ou _inequality-based_ les exigences permettent le filtrage par clés d'étiquette et valeurs. Les objets correspondants doivent satisfaire toutes les contraintes d'étiquette spécifiées, bien qu'ils puissent également avoir des étiquettes supplémentaires.
+Trois types d'opérateurs sont admis `=`,`==`,`!=`. Les deux premiers représentent _equality_ (et sont des synonymes), tandis que ce dernier représente l'inégalité.
+<br>
+Par exemple:
 
 ```
 environment = production
 tier != frontend
 ```
 
-The former selects all resources with key equal to `environment` and value equal to `production`.
-The latter selects all resources with key equal to `tier` and value distinct from `frontend`, and all resources with no labels with the `tier` key.
-One could filter for resources in `production` excluding `frontend` using the comma operator: `environment=production,tier!=frontend`
+Le premier sélectionne toutes les ressources dont la clé est égale à `environment` et valeur égale à `production`.
+Ce dernier sélectionne toutes les ressources dont la clé est égale à `tier` et une valeur distincte de `frontend`, et toutes les ressources sans étiquette avec la clé `tier`.
+On pourrait filtrer les ressources dans `production` excluant `frontend` en utilisant l'opérateur virgule: `environment=production,tier!=frontend`
 
-One usage scenario for equality-based label requirement is for Pods to specify
-node selection criteria. For example, the sample Pod below selects nodes with
-the label "`accelerator=nvidia-tesla-p100`".
+Un scénario d'utilisation pour l'exigence d'étiquette basée sur l'égalité est que les pods spécifient
+critères de sélection des nœuds. Par exemple, l'exemple de pod ci-dessous sélectionne des nœuds avec
+l'étiquette "`accelerator=nvidia-tesla-p100`".
 
 ```yaml
 apiVersion: v1
@@ -132,9 +129,9 @@ spec:
     accelerator: nvidia-tesla-p100
 ```
 
-### _Set-based_ requirement
+### Exigence basée sur un ensemble Set-based
 
-_Set-based_ label requirements allow filtering keys according to a set of values. Three kinds of operators are supported: `in`,`notin` and `exists` (only the key identifier). For example:
+Les exigences d'étiquette _Set-based_ permettent de filtrer les clés en fonction d'un ensemble de valeurs. Trois types d'opérateurs sont pris en charge: `in`,`notin` et `exists` (uniquement l'identifiant de la clé). Par exemple:
 
 ```
 environment in (production, qa)
@@ -143,84 +140,83 @@ partition
 !partition
 ```
 
-* The first example selects all resources with key equal to `environment` and value equal to `production` or `qa`.
-* The second example selects all resources with key equal to `tier` and values other than `frontend` and `backend`, and all resources with no labels with the `tier` key.
-* The third example selects all resources including a label with key `partition`; no values are checked.
-* The fourth example selects all resources without a label with key `partition`; no values are checked.
+* Le premier exemple sélectionne toutes les ressources dont la clé est égale à `environment` et valeur égale à `production` ou `qa`.
+* Le deuxième exemple sélectionne toutes les ressources dont la clé est égale à `tier` et des valeurs autres que `frontend` et `backend`, et toutes les ressources sans étiquette avec la clé `tier`.
+* Le troisième exemple sélectionne toutes les ressources, y compris une étiquette avec clé `partition`; aucune valeur n'est vérifiée.
+* Le quatrième exemple sélectionne toutes les ressources sans étiquette avec clé `partition`; aucune valeur n'est vérifiée.
 
-Similarly the comma separator acts as an _AND_ operator. So filtering resources with a `partition` key (no matter the value) and with `environment` different than  `qa` can be achieved using `partition,environment notin (qa)`.
-The _set-based_ label selector is a general form of equality since `environment=production` is equivalent to `environment in (production)`; similarly for `!=` and `notin`.
+De même, le séparateur par virgule agit comme un opérateur _AND_. Donc, filtrer les ressources avec une clé `partition`(peu importe la valeure) et avec `environnement` différent de `qa` peut être réalisé en utilisant `partition,environment notin (qa)`.
+Le sélecteur d'étiquettes basé sur un ensemble(Set-based) est une forme générale d'égalité puisque `environment=production` il est équivalent à `environment in (production)`; de même pour `!=` et `notin`.
 
-_Set-based_ requirements can be mixed with _equality-based_ requirements. For example: `partition in (customerA, customerB),environment!=qa`.
+Les exigences _set-based_ peuvent être combinées avec des exigences _equality-based_. Par exemple:<br> `partition in (customerA, customerB),environment!=qa`.
 
 
 ## API
 
-### LIST and WATCH filtering
+### Filtrage LISTE et visuel (LIST AND WATCH)
 
-LIST and WATCH operations may specify label selectors to filter the sets of objects returned using a query parameter. Both requirements are permitted (presented here as they would appear in a URL query string):
+Les opérations LIST et WATCH peuvent spécifier des sélecteurs d'étiquettes pour filtrer les ensembles d'objets renvoyés à l'aide d'un paramètre de requête. Les deux exigences sont autorisées (présentées ici telles qu'elles apparaissent dans une chaîne de requête URL):
+  * exigences fondées sur l'égalité (_equality-based_): `?labelSelector=environment%3Dproduction,tier%3Dfrontend`
+  * exigences basées sur les ensembles (_set-based_): `?labelSelector=environment+in+%28production%2Cqa%29%2Ctier+in+%28frontend%29`
 
-  * _equality-based_ requirements: `?labelSelector=environment%3Dproduction,tier%3Dfrontend`
-  * _set-based_ requirements: `?labelSelector=environment+in+%28production%2Cqa%29%2Ctier+in+%28frontend%29`
-
-Both label selector styles can be used to list or watch resources via a REST client. For example, targeting `apiserver` with `kubectl` and using _equality-based_ one may write:
+Les deux styles de sélecteur d'étiquettes peuvent être utilisés pour répertorier ou surveiller des ressources via un client REST. Par exemple, le ciblage `apiserver` avec `kubectl` et l'utilisation de _equality-based_ on peut écrire:
 
 ```shell
 kubectl get pods -l environment=production,tier=frontend
 ```
 
-or using _set-based_ requirements:
+ou utiliser l'exigence basée sur les ensembles (_set-based_) :
 
 ```shell
 kubectl get pods -l 'environment in (production),tier in (frontend)'
 ```
 
-As already mentioned _set-based_ requirements are more expressive.  For instance, they can implement the _OR_ operator on values:
+Comme déjà mentionné, les exigences basées sur les ensembles sont plus expressives.  Par exemple, ils peuvent implémenter l'opérateur _OR_ sur les valeurs:
 
 ```shell
 kubectl get pods -l 'environment in (production, qa)'
 ```
 
-or restricting negative matching via _exists_ operator:
+ou restreindre la correspondance négative via l'opérateur _exists_:
 
 ```shell
 kubectl get pods -l 'environment,environment notin (frontend)'
 ```
 
-### Set references in API objects
+### Définir des références dans les objets API
 
-Some Kubernetes objects, such as [`services`](/docs/concepts/services-networking/service/)
-and [`replicationcontrollers`](/docs/concepts/workloads/controllers/replicationcontroller/),
-also use label selectors to specify sets of other resources, such as
+Certains objets Kubernetes, tels que [`services`](/docs/concepts/services-networking/service/)
+et [`replicationcontrollers`](/docs/concepts/workloads/controllers/replicationcontroller/),
+utilisez également des sélecteurs d'étiquettes pour spécifier des ensembles d'autres ressources, telles que
 [pods](/docs/concepts/workloads/pods/).
 
-#### Service and ReplicationController
+#### Service et ReplicationController
 
-The set of pods that a `service` targets is defined with a label selector. Similarly, the population of pods that a `replicationcontroller` should manage is also defined with a label selector.
+L'ensemble des pods qu'un `service` Les cibles sont définies avec un sélecteur d'étiquettes. De même, la population de gousses qui a `replicationcontroller` should manage est également défini avec un sélecteur d'étiquettes.
 
-Labels selectors for both objects are defined in `json` or `yaml` files using maps, and only _equality-based_ requirement selectors are supported:
+Les sélecteurs d'étiquettes pour les deux objets sont définis dans `json` ou `yaml` les fichiers utilisant des cartes, et seuls les sélecteurs d'exigences _basés sur l'égalité(_equality-based_) sont pris en charge:
 
 ```json
 "selector": {
     "component" : "redis",
 }
 ```
-or
+ou
 
 ```yaml
 selector:
     component: redis
 ```
 
-this selector (respectively in `json` or `yaml` format) is equivalent to `component=redis` or `component in (redis)`.
+ce sélecteur (respectivement dans `json` ou `yaml` format) est équivalent à `component=redis` ou `component in (redis)`.
 
-#### Resources that support set-based requirements
+#### Ressources prenant en charge les exigences basées sur les ensembles
 
-Newer resources, such as [`Job`](/docs/concepts/workloads/controllers/job/),
+Des ressources plus récentes, telles que [`Job`](/docs/concepts/workloads/controllers/job/),
 [`Deployment`](/docs/concepts/workloads/controllers/deployment/),
-[`ReplicaSet`](/docs/concepts/workloads/controllers/replicaset/), and
+[`ReplicaSet`](/docs/concepts/workloads/controllers/replicaset/), et
 [`DaemonSet`](/docs/concepts/workloads/controllers/daemonset/),
-support _set-based_ requirements as well.
+prend également en charge les exigences basées sur les ensembles(_set-based_).
 
 ```yaml
 selector:
@@ -231,9 +227,9 @@ selector:
     - {key: environment, operator: NotIn, values: [dev]}
 ```
 
-`matchLabels` is a map of `{key,value}` pairs. A single `{key,value}` in the `matchLabels` map is equivalent to an element of `matchExpressions`, whose `key` field is "key", the `operator` is "In", and the `values` array contains only "value". `matchExpressions` is a list of pod selector requirements. Valid operators include In, NotIn, Exists, and DoesNotExist. The values set must be non-empty in the case of In and NotIn. All of the requirements, from both `matchLabels` and `matchExpressions` are ANDed together -- they must all be satisfied in order to match.
+`matchLabels` est une carte de `{key,value}` paires. Un seul `{key,value}` dans la carte `matchLabels` équivaut à un élément de `matchExpressions`, dont le champ `key` est "key", l'opérateur `operator` est "In", et le tableau `values` contient uniquement "value". `matchExpressions`est une liste des exigences du sélecteur de pod. Les opérateurs valides incluent In, NotIn, Exists, and DoesNotExist.Les valeurs définies doivent être non vides dans le cas de In et NotIn.Toutes les exigences, des deux `matchLabels`et `matchExpressions` sont ANDed together -- ils doivent tous être satisfaits pour correspondre.
 
-#### Selecting sets of nodes
+#### Sélection d'ensembles de nœuds.
 
-One use case for selecting over labels is to constrain the set of nodes onto which a pod can schedule.
-See the documentation on [node selection](/docs/concepts/scheduling-eviction/assign-pod-node/) for more information.
+Un cas d'utilisation pour la sélection sur des étiquettes est de contraindre l'ensemble de nœuds sur lequel un pod peut planifier.
+Voir la documentation sur [node selection](/docs/concepts/scheduling-eviction/assign-pod-node/) pour plus d'information.
